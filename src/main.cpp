@@ -150,27 +150,14 @@ M5.update();  // Check the status of the key.  检测按键的状态
         adc_raw = total / count;
     }
 
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    if (now_gain == PAG_512) {
-        M5.Lcd.setCursor(9, 10);
-        M5.Lcd.printf("Hope volt: %.2f mv  \r\n", page512_volt);
-    } else {
-        M5.Lcd.setCursor(9, 10);
-        M5.Lcd.printf("Hope volt: %.2f mv \r\n", page4096_volt);
-    }
-
-    M5.Lcd.setCursor(10, 60);
-    M5.Lcd.printf("Hope ADC: %d \r\n", hope);
 
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 100);
-    M5.Lcd.printf("Cal volt: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
+    M5.Lcd.setCursor(10, 20);
+    M5.Lcd.printf("Napeti : %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
     
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 130);
+    M5.Lcd.setCursor(10, 40);
     M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
-
-
     
     M5.Lcd.setCursor(10,180);
     M5.Lcd.print(sCommand, HEX);
@@ -198,21 +185,13 @@ M5.update();  // Check the status of the key.  检测按键的状态
         adc_raw = total / count;
     }
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 30);
-    M5.Lcd.printf("Hope volt:");
-    M5.Lcd.setCursor(10, 30);
-    M5.Lcd.printf("%.2f mAn", page512_volt);
-
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 80);
+    M5.Lcd.setCursor(10, 60);
     M5.Lcd.printf("Cal volt:");
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.printf("%.2f mA", current);
+    M5.Lcd.setCursor(10, 60);
+    M5.Lcd.printf("Proud: %.2f mA", current);
 
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 150);
-    M5.Lcd.printf("Cal ADC:");
-    M5.Lcd.setCursor(10, 150);
-    M5.Lcd.printf("%.0f", adc_raw * Ammeter.calibration_factor);
+    M5.Lcd.setCursor(10, 80);
+    M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
 }
