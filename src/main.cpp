@@ -198,6 +198,6 @@ M5.update();  // Check the status of the key.  检测按键的状态
 
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 80);
-    M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
+    //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
 }
