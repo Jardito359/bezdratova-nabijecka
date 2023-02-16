@@ -1,0 +1,34 @@
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
+#include <M5StickCPlus.h>
+
+Adafruit_ADS1115 ads_volt;
+Adafruit_ADS1115 ads_curr;
+
+const float VOLTAGE_DIVIDER_RATIO = 0.5; // Change this to match your voltage divider ratio
+const float VOLTAGE_REF = 4.096; // ADS1115 voltage reference in volts
+const float CURRENT_SENSITIVITY = 0.1875; // Change this to match your current sensor sensitivity
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+
+  ads_volt.begin(0x48); // Address of the voltage sensor ADS1115
+  ads_volt.setGain(GAIN_ONE);
+
+  ads_curr.begin(0x49); // Address of the current sensor ADS1115
+  ads_curr.setGain(GAIN_EIGHT);
+}
+
+void loop() {
+  float voltage = ads_volt.readADC_SingleEnded(0) * (VOLTAGE_REF / 32767.0) / VOLTAGE_DIVIDER_RATIO;
+  float current = ads_curr.readADC_SingleEnded(0) * (VOLTAGE_REF / 32767.0) / CURRENT_SENSITIVITY;
+
+  Serial.print("Voltage: ");
+  Serial.print(voltage);
+  Serial.print(" V, Current: ");
+  Serial.print(current);
+  Serial.println(" A");
+
+  delay(1000);
+}

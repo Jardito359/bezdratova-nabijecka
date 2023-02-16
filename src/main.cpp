@@ -22,13 +22,12 @@ int16_t adc_raw     = 0;
 
 int16_t hope = 0.0;
 
-
 ADS1115Gain_t now_gain = PAG_512;
 
 void setup(void) {
     M5.begin();
     Wire.begin();
-
+    
     voltmeter.setMode(SINGLESHOT);              // | PAG      | Max Input Voltage(V) |
     voltmeter.setRate(RATE_8);                  // | PAG_6144 |        128           |
     voltmeter.setGain(PAG_512);                 // | PAG_4096 |        64            |
@@ -38,7 +37,7 @@ void setup(void) {
     M5.Lcd.setTextFont(4);  // Set font to 4 point font.  设置字体为4号字体
 
     M5.Lcd.setCursor(52, 210);  // Set the cursor at (52,210).  将光标设置在(52, 210)
-    
+
     M5.begin();
     Serial.begin(115200);
     M5.Lcd.setTextFont(1);
@@ -109,12 +108,13 @@ M5.update();  // Check the status of the key.  检测按键的状态
             volt_raw_list[i] = 0;
         }
     }
-
+    
+ 
     sAddress = 0x1;
     sCommand = 0x1;
 
     M5.update();
-    if(M5.BtnA.isPressed()){
+    if(M5.BtnA.wasPressed()){
 
         if(i ==0){
             sCommand = 0x49;
@@ -150,35 +150,30 @@ M5.update();  // Check the status of the key.  检测按键的状态
         adc_raw = total / count;
     }
 
+    float volt= voltmeter.getValue() * -1;
     M5.Lcd.setTextColor(WHITE, BLACK);
-    if (now_gain == PAG_512) {
-        M5.Lcd.setCursor(9, 10);
-        M5.Lcd.printf("Hope volt: %.2f mv  \r\n", page512_volt);
-    } else {
-        M5.Lcd.setCursor(9, 10);
-        M5.Lcd.printf("Hope volt: %.2f mv \r\n", page4096_volt);
-    }
-
-    M5.Lcd.setCursor(10, 60);
-    M5.Lcd.printf("Hope ADC: %d \r\n", hope);
-
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 100);
-    M5.Lcd.printf("Cal volt: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
+    M5.Lcd.setCursor(10, 20);
+    M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
     
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 130);
-    M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
-
-
+    //M5.Lcd.setTextColor(WHITE, BLACK);
+    //M5.Lcd.setCursor(10, 40);
+    //M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
     
     M5.Lcd.setCursor(10,180);
     M5.Lcd.print(sCommand, HEX);
     M5.Lcd.setCursor(10,190);
     M5.Lcd.println("poslano");
-    Serial.print("poslano ");
-     
-    float current = Ammeter.getValue();
+    //Serial.print("poslano ");
+    //powerbanka max 11763V = 117,63
+    //sluchátka krabička 26%
+    float baterie= volt/117;
+    float current = Ammeter.getValue() * -1;
+    Serial.print(volt);
+    Serial.print(" ");
+    Serial.print(current);
+    Serial.print(" ");
+    Serial.print(baterie);
+
 
     volt_raw_list[raw_now_ptr] = Ammeter.adc_raw;
     raw_now_ptr                = (raw_now_ptr == 9) ? 0 : (raw_now_ptr + 1);
@@ -198,21 +193,11 @@ M5.update();  // Check the status of the key.  检测按键的状态
         adc_raw = total / count;
     }
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 30);
-    M5.Lcd.printf("Hope volt:");
-    M5.Lcd.setCursor(10, 30);
-    M5.Lcd.printf("%.2f mAn", page512_volt);
+    M5.Lcd.setCursor(10, 40);
+    M5.Lcd.printf("Proud:  %.2f mA", current);
 
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.printf("Cal volt:");
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.printf("%.2f mA", current);
-
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 150);
-    M5.Lcd.printf("Cal ADC:");
-    M5.Lcd.setCursor(10, 150);
-    M5.Lcd.printf("%.0f", adc_raw * Ammeter.calibration_factor);
+    //M5.Lcd.setTextColor(WHITE, BLACK);
+    //M5.Lcd.setCursor(10, 80);
+    //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
 }
