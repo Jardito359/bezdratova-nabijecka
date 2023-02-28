@@ -194,11 +194,7 @@ M5.update();  // Check the status of the key.  检测按键的状态
     //Serial.print("poslano ");
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-<<<<<<< HEAD
     float baterie = volt/5;
-=======
-    float baterie= volt/117;
->>>>>>> c17344189ffcfd136c384d5b067ebc646583ac3c
     float current = Ammeter.getValue() * -1;
     Serial.print(volt);
     Serial.print(" ");
