@@ -3,10 +3,24 @@
 #include "PinDefinitionsAndMore.h"
 #include <IRremote.hpp>
 #include <Wire.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+
 
 uint8_t sAddress = 0x8;
 uint8_t sCommand = 0x3D;
 uint8_t sRepeats = 1;
+
+// WiFi network credentials
+const char* ssid = "Beranovi 2,4GHZ";
+const char* password = "Beran 58";
+
+// ThingSpeak API key
+const String apiKey = "EJOZM1CDMLSB012G";
+
+// ThingSpeak channel ID
+const String channelId = "2046903";
+
 
 //0x49 - zapnuto 0x3D vypnuto
 
@@ -23,6 +37,8 @@ int16_t adc_raw     = 0;
 int16_t hope = 0.0;
 
 ADS1115Gain_t now_gain = PAG_512;
+
+WiFiClient client;
 
 void setup(void) {
     M5.begin();
@@ -65,6 +81,18 @@ void setup(void) {
 
     // bool result1 = Ammeter.saveCalibration2EEPROM(PAG_256, 1024, 1024);
     // delay(10);
+
+    // Connect to Wi-Fi network
+    M5.begin();
+    M5.Lcd.println("Connecting to Wi-Fi...");
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        M5.Lcd.print(".");
+    }
+    M5.Lcd.println("");
+    M5.Lcd.println("Wi-Fi connected!");
+
 }
 
 
@@ -166,7 +194,7 @@ M5.update();  // Check the status of the key.  检测按键的状态
     //Serial.print("poslano ");
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie= volt/117;
+    float baterie = volt/5;
     float current = Ammeter.getValue() * -1;
     Serial.print(volt);
     Serial.print(" ");
@@ -198,6 +226,18 @@ M5.update();  // Check the status of the key.  检测按键的状态
 
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 80);
-    M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
+    //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
+
+    String url = "http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(volt) + "&field2=" + String(current) + "&field3" + String(baterie);
+
+    HTTPClient http;
+    http.begin(client, url);
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+        M5.Lcd.println("Data sent to ThingSpeak");
+    } else {
+        M5.Lcd.println("Error sending data to ThingSpeak");
+    }
+    http.end();
 }
