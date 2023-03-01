@@ -16,7 +16,7 @@ const char* ssid = "Beranovi 2,4GHZ";
 const char* password = "Beran 58";
 
 // ThingSpeak API key
-const String apiKey = "EJOZM1CDMLSB012G";
+const String apiKey = "Q6YWHA59CXHHWF68";
 
 // ThingSpeak channel ID
 const String channelId = "2046903";
@@ -82,6 +82,9 @@ void setup(void) {
     // bool result1 = Ammeter.saveCalibration2EEPROM(PAG_256, 1024, 1024);
     // delay(10);
 
+    pinMode(10, OUTPUT); // nastavení pinu 10 jako výstupní pin pro ovládání LED diody
+    digitalWrite(10, HIGH); // nastavení červené barvy
+
     // Connect to Wi-Fi network
     M5.begin();
     M5.Lcd.println("Connecting to Wi-Fi...");
@@ -139,10 +142,11 @@ M5.update();
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 40);
     //M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
-    
+
+        
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie = volt/12;
+    float baterie = volt/37;
     float current = Ammeter.getValue() * -1;
     Serial.print(volt);
     Serial.print(" ");
@@ -150,6 +154,14 @@ M5.update();
     Serial.print(" ");
     Serial.print(baterie);
 
+    
+        int hodnota = 0; // nahradte tuto proměnnou vaším vlastním zdrojem dat
+    while (hodnota < 100) {
+        hodnota = baterie ; // nahradte tuto řádku vaším zdrojem dat pro získání hodnoty
+    }
+    digitalWrite(10, LOW); // vypnutí červené LED diody
+    digitalWrite(10, HIGH); // zapnutí zelené LED diody
+    
 
     volt_raw_list[raw_now_ptr] = Ammeter.adc_raw;
     raw_now_ptr                = (raw_now_ptr == 9) ? 0 : (raw_now_ptr + 1);
