@@ -92,11 +92,10 @@ void setup(void) {
     }
     M5.Lcd.println("");
     M5.Lcd.println("Wi-Fi connected!");
-
 }
 
-
 void loop() 
+
 {
 M5.update(); 
 
