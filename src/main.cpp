@@ -96,66 +96,20 @@ void setup(void) {
 }
 
 
-int i;
-
 void loop() 
 {
-M5.update();  // Check the status of the key.  检测按键的状态
-  if (M5.BtnA.wasPressed()) {
-      voltmeter.setMode(SINGLESHOT);  // Set the mode.  设置模式
-      voltmeter.setRate(RATE_8);      // Set the rate.  设置速率
-      voltmeter.setGain(PAG_512);
-      now_gain = PAG_512;
-      hope     = page512_volt / voltmeter.resolution;
+M5.update(); 
 
-      for (uint8_t i = 0; i < 10; i++) {
-        volt_raw_list[i] = 0;
-      }
-    }
-    if (M5.BtnA.wasPressed()) {
-        Ammeter.setMode(SINGLESHOT);
-        Ammeter.setRate(RATE_8);
-        Ammeter.setGain(PAG_512);
-        now_gain = PAG_512;
-        hope     = page512_volt / Ammeter.resolution;
-
-        for (uint8_t i = 0; i < 10; i++) {
-            volt_raw_list[i] = 0;
-        }
-    }
-
-
-    if (M5.BtnB.wasPressed()) {
-        voltmeter.setMode(SINGLESHOT);
-        voltmeter.setRate(RATE_8);
-        voltmeter.setGain(PAG_4096);
-        now_gain = PAG_4096;
-        hope     = page4096_volt / voltmeter.resolution;
-
-        for (uint8_t i = 0; i < 10; i++) {
-            volt_raw_list[i] = 0;
-        }
-    }
-    
- 
     sAddress = 0x1;
-    sCommand = 0x1;
+    sCommand = 0xA;
+    sRepeats = 0x10;
+    IrSender.sendNEC(sAddress, sCommand, sRepeats);
+    M5.Lcd.setCursor(10,180);
+    M5.Lcd.print(sCommand, HEX);
+    M5.Lcd.setCursor(10,190);
+    M5.Lcd.println("poslano");
+    Serial.print("poslano ");
 
-    M5.update();
-    if(M5.BtnA.wasPressed()){
-
-        if(i ==0){
-            sCommand = 0x49;
-            IrSender.sendNEC(sAddress, sCommand, sRepeats);
-            i++;
-        }
-        else{
-            sCommand = 0x3D;
-            IrSender.sendNEC(sAddress, sCommand, sRepeats);
-            i = 0;
-        }
-
-    }
     voltmeter.getValue();
 
     volt_raw_list[raw_now_ptr] = voltmeter.adc_raw;
@@ -187,14 +141,9 @@ M5.update();  // Check the status of the key.  检测按键的状态
     //M5.Lcd.setCursor(10, 40);
     //M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
     
-    M5.Lcd.setCursor(10,180);
-    M5.Lcd.print(sCommand, HEX);
-    M5.Lcd.setCursor(10,190);
-    M5.Lcd.println("poslano");
-    //Serial.print("poslano ");
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie = volt/5;
+    float baterie = volt/12;
     float current = Ammeter.getValue() * -1;
     Serial.print(volt);
     Serial.print(" ");
@@ -235,8 +184,10 @@ M5.update();  // Check the status of the key.  检测按键的状态
     http.begin(client, url);
     int httpCode = http.GET();
     if (httpCode > 0) {
+        M5.Lcd.setCursor(10, 60);
         M5.Lcd.println("Data sent to ThingSpeak");
     } else {
+        M5.Lcd.setCursor(10, 70);
         M5.Lcd.println("Error sending data to ThingSpeak");
     }
     http.end();

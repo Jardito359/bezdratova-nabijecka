@@ -31,4 +31,18 @@ void loop() {
   Serial.println(" A");
 
   delay(1000);
+
+
+
+
+  if(i ==0){
+            sCommand = 0xA;
+            IrSender.sendNEC(sAddress, sCommand, sRepeats);
+            i++;
+        }
+        else{
+            sCommand = 0xA;
+            IrSender.sendNEC(sAddress, sCommand, sRepeats);
+            i = 0;
+        }
 }
