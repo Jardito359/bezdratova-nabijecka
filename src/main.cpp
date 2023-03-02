@@ -155,7 +155,7 @@ M5.update();
     Serial.print(baterie);
 
     
-        int hodnota = 0; // nahradte tuto proměnnou vaším vlastním zdrojem dat
+        int hodnota = baterie; // nahradte tuto proměnnou vaším vlastním zdrojem dat
     while (hodnota < 100) {
         hodnota = baterie ; // nahradte tuto řádku vaším zdrojem dat pro získání hodnoty
     }
