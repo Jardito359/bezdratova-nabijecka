@@ -104,7 +104,7 @@ M5.update();
 
     sAddress = 0x1;
     sCommand = 0xA;
-    sRepeats = 0x10;
+    //sRepeats = 0x10;
     IrSender.sendNEC(sAddress, sCommand, sRepeats);
     M5.Lcd.setCursor(10,180);
     M5.Lcd.print(sCommand, HEX);
@@ -154,14 +154,6 @@ M5.update();
     Serial.print(current);
     Serial.print(" ");
     Serial.print(baterie);
-
-    
-        int hodnota = baterie; // nahradte tuto proměnnou vaším vlastním zdrojem dat
-    while (hodnota < 100) {
-        hodnota = baterie ; // nahradte tuto řádku vaším zdrojem dat pro získání hodnoty
-    }
-    digitalWrite(10, LOW); // vypnutí červené LED diody
-    digitalWrite(10, HIGH); // zapnutí zelené LED diody
     
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 40);
