@@ -138,6 +138,7 @@ M5.update();
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
+
     
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 40);
@@ -162,6 +163,9 @@ M5.update();
     digitalWrite(10, LOW); // vypnutí červené LED diody
     digitalWrite(10, HIGH); // zapnutí zelené LED diody
     
+    M5.Lcd.setTextColor(WHITE, BLACK);
+    M5.Lcd.setCursor(10, 40);
+    M5.Lcd.printf("Proud:  %.2f mA", current);
 
     volt_raw_list[raw_now_ptr] = Ammeter.adc_raw;
     raw_now_ptr                = (raw_now_ptr == 9) ? 0 : (raw_now_ptr + 1);
@@ -180,10 +184,7 @@ M5.update();
     } else {
         adc_raw = total / count;
     }
-    M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 40);
-    M5.Lcd.printf("Proud:  %.2f mA", current);
-
+    
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 80);
     //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
