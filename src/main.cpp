@@ -133,9 +133,6 @@ void setup(void) {
     // bool result1 = Ammeter.saveCalibration2EEPROM(PAG_256, 1024, 1024);
     // delay(10);
 
-    pinMode(10, OUTPUT); // nastavení pinu 10 jako výstupní pin pro ovládání LED diody
-    digitalWrite(10, HIGH); // nastavení červené barvy
-
     // Connect to Wi-Fi network
     M5.begin();
     Serial.begin(115200);
