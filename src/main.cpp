@@ -11,15 +11,15 @@ uint8_t sAddress = 0x8;
 uint8_t sCommand = 0x3D;
 uint8_t sRepeats = 1;
 
-// WiFi network credentials
+
 const char* ssid = "Beranovi 2,4GHZ";
 const char* password = "Beran 58";
+const char* server = "api.thingspeak.com";
 
-// ThingSpeak API key
 const String apiKey = "Q6YWHA59CXHHWF68";
-
-// ThingSpeak channel ID
 const String channelId = "2046903";
+const String field1Name = "Napětí";
+const String field2Name = "Proud";
 
 
 //0x49 - zapnuto 0x3D vypnuto
@@ -87,14 +87,13 @@ void setup(void) {
 
     // Connect to Wi-Fi network
     M5.begin();
-    M5.Lcd.println("Connecting to Wi-Fi...");
+    Serial.begin(115200);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
-        M5.Lcd.print(".");
+        Serial.println("Connecting to WiFi...");
     }
-    M5.Lcd.println("");
-    M5.Lcd.println("Wi-Fi connected!");
+    Serial.println("Connected to WiFi");
 }
 
 void loop() 
@@ -104,7 +103,7 @@ M5.update();
 
     sAddress = 0x1;
     sCommand = 0xA;
-    //sRepeats = 0x10;
+    sRepeats = 0x1;
     IrSender.sendNEC(sAddress, sCommand, sRepeats);
     M5.Lcd.setCursor(10,180);
     M5.Lcd.print(sCommand, HEX);
@@ -134,7 +133,7 @@ M5.update();
         adc_raw = total / count;
     }
 
-    float volt= voltmeter.getValue() * -1;
+    float volt= voltmeter.getValue() *(-1);
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
@@ -143,12 +142,11 @@ M5.update();
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 40);
     //M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
-
         
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie = volt/37;
-    float current = Ammeter.getValue() * -1;
+    float baterie = volt/12;
+    float current = Ammeter.getValue() ;
     Serial.print(volt);
     Serial.print(" ");
     Serial.print(current);
@@ -181,18 +179,34 @@ M5.update();
     //M5.Lcd.setCursor(10, 80);
     //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
+    Serial.print("Voltage: ");
+    Serial.print(volt);
+    Serial.print(" V, Current: ");
+    Serial.print(current);
+    Serial.println(" A");
 
-    String url = "http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(volt) + "&field2=" + String(current) + "&field3" + String(baterie);
-
-    HTTPClient http;
-    http.begin(client, url);
-    int httpCode = http.GET();
-    if (httpCode > 0) {
-        M5.Lcd.setCursor(10, 60);
-        M5.Lcd.println("Data sent to ThingSpeak");
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        String url = "http://" + String(server) + "/update?api_key=" + apiKey + "&" + field1Name + "=" + String(volt) + "&" + field2Name + "=" + String(current);
+        http.begin(url);
+        int httpCode = http.GET();
+        if (httpCode > 0) {
+        Serial.println("Data sent to ThingSpeak");
+        } else {
+        Serial.println("Error sending data to ThingSpeak");
+        }
+        http.end();
     } else {
-        M5.Lcd.setCursor(10, 70);
-        M5.Lcd.println("Error sending data to ThingSpeak");
+        Serial.println("WiFi not connected");
     }
-    http.end();
+
+  delay(15000); // prodleva 10 sekund
+}
+
+float volt() {
+  // kód pro čtení hodnoty z voltmetru
+}
+
+float current() {
+  // kód pro čtení hodnoty z ampérmetru
 }
