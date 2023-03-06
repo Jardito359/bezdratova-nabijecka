@@ -3,24 +3,19 @@
 #include "PinDefinitionsAndMore.h"
 #include <IRremote.hpp>
 #include <Wire.h>
+#include "ThingSpeak.h"
 #include <WiFi.h>
-#include <HTTPClient.h>
+#define CHANNEL_ID 2046903
+#define CHANNEL_API_KEY "Q6YWHA59CXHHWF68"
+#define WIFI_TIMEOUT_MS 20000
+#define WIFI_NETWORK "Beranovi 2,4GHZ"
+#define WIFI_PASSWORD "Beran 58"
+
 
 
 uint8_t sAddress = 0x8;
 uint8_t sCommand = 0x3D;
 uint8_t sRepeats = 1;
-
-
-const char* ssid = "Beranovi 2,4GHZ";
-const char* password = "Beran 58";
-const char* server = "api.thingspeak.com";
-
-const String apiKey = "Q6YWHA59CXHHWF68";
-const String channelId = "2046903";
-const String field1Name = "Napětí";
-const String field2Name = "Proud";
-
 
 //0x49 - zapnuto 0x3D vypnuto
 
@@ -39,6 +34,30 @@ int16_t hope = 0.0;
 ADS1115Gain_t now_gain = PAG_512;
 
 WiFiClient client;
+
+void connectToWiFi(){
+    Serial.print("Connecting to Wifi");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_NETWORK, WIFI_PASSWORD);
+
+    unsigned long startAttemptTime = millis();
+
+    // Keep looping while we're not connected and haven't reached the timeout
+    while (WiFi.status() != WL_CONNECTED && 
+              millis() - startAttemptTime < WIFI_TIMEOUT_MS){
+        Serial.print(".");
+        delay(100);
+    }
+
+    // Make sure that we're actually connected, otherwise go to deep sleep
+    if(WiFi.status() != WL_CONNECTED){
+        Serial.println(" Failed!");
+      // Handle this case. Restart ESP, go to deep sleep, retry after delay...
+    }else{
+        Serial.print(" Connected!");
+        Serial.println(WiFi.localIP());
+    }
+}
 
 void setup(void) {
     M5.begin();
@@ -88,18 +107,16 @@ void setup(void) {
     // Connect to Wi-Fi network
     M5.begin();
     Serial.begin(115200);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
+    connectToWiFi(); // this function comes from a previous video
+    
+    ThingSpeak.begin(client);
     }
-    Serial.println("Connected to WiFi");
-}
 
 void loop() 
 
-{
-M5.update(); 
+    {
+    M5.update(); 
+
 
     sAddress = 0x1;
     sCommand = 0xA;
@@ -179,34 +196,9 @@ M5.update();
     //M5.Lcd.setCursor(10, 80);
     //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 
-    Serial.print("Voltage: ");
-    Serial.print(volt);
-    Serial.print(" V, Current: ");
-    Serial.print(current);
-    Serial.println(" A");
+    ThingSpeak.setField(1, volt);
+    ThingSpeak.setField(2, current);
+    ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
 
-    if (WiFi.status() == WL_CONNECTED) {
-        HTTPClient http;
-        String url = "http://" + String(server) + "/update?api_key=" + apiKey + "&" + field1Name + "=" + String(volt) + "&" + field2Name + "=" + String(current);
-        http.begin(url);
-        int httpCode = http.GET();
-        if (httpCode > 0) {
-        Serial.println("Data sent to ThingSpeak");
-        } else {
-        Serial.println("Error sending data to ThingSpeak");
-        }
-        http.end();
-    } else {
-        Serial.println("WiFi not connected");
-    }
-
-  delay(15000); // prodleva 10 sekund
-}
-
-float volt() {
-  // kód pro čtení hodnoty z voltmetru
-}
-
-float current() {
-  // kód pro čtení hodnoty z ampérmetru
+    delay(15000); // 15 seconds
 }
