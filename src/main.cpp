@@ -150,7 +150,7 @@ void loop()
         adc_raw = total / count;
     }
 
-    float volt= voltmeter.getValue() *(-1);
+    float volt= voltmeter.getValue() ;
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
@@ -162,7 +162,7 @@ void loop()
         
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie = volt/12;
+    float baterie = volt/120;
     float current = Ammeter.getValue() ;
     Serial.print(volt);
     Serial.print(" ");
@@ -195,10 +195,12 @@ void loop()
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 80);
     //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
-
-    ThingSpeak.setField(1, volt);
-    ThingSpeak.setField(2, current);
-    ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
-
+    if (volt != 0 && current!= 0 && baterie!= 0){
+        ThingSpeak.setField(1, volt);
+        ThingSpeak.setField(2, current);
+        ThingSpeak.setField(3, baterie);
+        ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
+    }
+    
     delay(15000); // 15 seconds
 }
