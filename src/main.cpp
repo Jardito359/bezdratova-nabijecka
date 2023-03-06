@@ -5,6 +5,8 @@
 #include <Wire.h>
 #include "ThingSpeak.h"
 #include <WiFi.h>
+#include <AsyncTaskLib.h>
+#include "curl/curl.h"
 #define CHANNEL_ID 2046903
 #define CHANNEL_API_KEY "Q6YWHA59CXHHWF68"
 #define WIFI_TIMEOUT_MS 20000
@@ -12,7 +14,9 @@
 #define WIFI_PASSWORD "Beran 58"
 
 
-
+float volt = 0;
+float current = 0;
+float baterie = 0;
 uint8_t sAddress = 0x8;
 uint8_t sCommand = 0x3D;
 uint8_t sRepeats = 1;
@@ -57,12 +61,40 @@ void connectToWiFi(){
         Serial.print(" Connected!");
         Serial.println(WiFi.localIP());
     }
+
+}
+void odesilani(float volt,float current,float baterie)
+{
+    if (volt != 0 && current!= 0 && baterie!= 0){
+            ThingSpeak.setField(1, volt);
+            ThingSpeak.setField(2, current);
+            ThingSpeak.setField(3, baterie);
+            ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
+        }
+}
+AsyncTask task(15000, true, []() { odesilani(volt, current,baterie); });
+int globalInit = 0;
+void smazani(){
+    CURL *curl;
+    CURLcode res;
+    if(globalInit == 0) {
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    }
+    globalInit++;
+    curl = curl_easy_init();
+    if(curl){
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.thingspeak.com/channels/2046903/feeds.json");
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST,"DELETE");
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+    }
+ 
 }
 
 void setup(void) {
     M5.begin();
     Wire.begin();
-    
+
     voltmeter.setMode(SINGLESHOT);              // | PAG      | Max Input Voltage(V) |
     voltmeter.setRate(RATE_8);                  // | PAG_6144 |        128           |
     voltmeter.setGain(PAG_512);                 // | PAG_4096 |        64            |
@@ -110,14 +142,17 @@ void setup(void) {
     connectToWiFi(); // this function comes from a previous video
     
     ThingSpeak.begin(client);
+    task.Start();
     }
 
 void loop() 
 
     {
     M5.update(); 
-
-
+    task.Update();
+    if (M5.BtnA.wasReleased()){
+        smazani();
+    }
     sAddress = 0x1;
     sCommand = 0xA;
     sRepeats = 0x1;
@@ -150,7 +185,7 @@ void loop()
         adc_raw = total / count;
     }
 
-    float volt= voltmeter.getValue() ;
+    volt= voltmeter.getValue() ;
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
@@ -162,8 +197,8 @@ void loop()
         
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
-    float baterie = volt/120;
-    float current = Ammeter.getValue() ;
+    baterie = volt/120;
+    current = Ammeter.getValue() ;
     Serial.print(volt);
     Serial.print(" ");
     Serial.print(current);
@@ -195,12 +230,5 @@ void loop()
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 80);
     //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
-    if (volt != 0 && current!= 0 && baterie!= 0){
-        ThingSpeak.setField(1, volt);
-        ThingSpeak.setField(2, current);
-        ThingSpeak.setField(3, baterie);
-        ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
-    }
-    
-    delay(15000); // 15 seconds
+
 }
