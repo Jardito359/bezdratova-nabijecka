@@ -5,8 +5,6 @@
 #include <Wire.h>
 #include "ThingSpeak.h"
 #include <WiFi.h>
-#include <AsyncTaskLib.h>
-#include "curl/curl.h"
 #define CHANNEL_ID 2046903
 #define CHANNEL_API_KEY "Q6YWHA59CXHHWF68"
 #define WIFI_TIMEOUT_MS 20000
@@ -72,24 +70,6 @@ void odesilani(float volt,float current,float baterie)
             ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
         }
 }
-AsyncTask task(15000, true, []() { odesilani(volt, current,baterie); });
-int globalInit = 0;
-void smazani(){
-    CURL *curl;
-    CURLcode res;
-    if(globalInit == 0) {
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    }
-    globalInit++;
-    curl = curl_easy_init();
-    if(curl){
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.thingspeak.com/channels/2046903/feeds.json");
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST,"DELETE");
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-    }
- 
-}
 
 void setup(void) {
     M5.begin();
@@ -137,19 +117,10 @@ void setup(void) {
     M5.begin();
     Serial.begin(115200);
     connectToWiFi(); // this function comes from a previous video
+}
+void loop()
+{
     
-    ThingSpeak.begin(client);
-    task.Start();
-    }
-
-void loop() 
-
-    {
-    M5.update(); 
-    task.Update();
-    if (M5.BtnA.wasReleased()){
-        smazani();
-    }
     sAddress = 0x1;
     sCommand = 0xA;
     sRepeats = 0x1;
