@@ -13,9 +13,9 @@
 #define WIFI_PASSWORD "Beran 58"
 
 
-float volt = 0;
-float current = 0;
-float baterie = 0;
+float volt;
+float current; 
+float baterie;
 uint8_t sAddress = 0x8;
 uint8_t sCommand = 0x3D;
 uint8_t sRepeats = 1;
@@ -64,11 +64,13 @@ void connectToWiFi(){
 }
 void odesilani(float volt,float current,float baterie)
 {
+    Serial.print("posilam");
     if (volt != 0 && current!= 0 && baterie!= 0){
             ThingSpeak.setField(1, volt);
             ThingSpeak.setField(2, current);
             ThingSpeak.setField(3, baterie);
             ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
+            Serial.print("poslano");
         }
 }
 AsyncTask task(15000, true, []() { odesilani(volt, current,baterie); });
@@ -124,7 +126,6 @@ void setup(void) {
 void loop()
 {
     M5.update(); 
-    task.Update();
     sAddress = 0x1;
     sCommand = 0xA;
     sRepeats = 0x1;
@@ -132,8 +133,8 @@ void loop()
     M5.Lcd.setCursor(10,180);
     M5.Lcd.print(sCommand, HEX);
     M5.Lcd.setCursor(10,190);
-    M5.Lcd.println("poslano");
-    Serial.print("poslano ");
+    //M5.Lcd.println("poslano");
+   // Serial.print("poslano ");
 
     voltmeter.getValue();
 
@@ -157,7 +158,8 @@ void loop()
         adc_raw = total / count;
     }
 
-    volt= voltmeter.getValue() * -1;
+    volt= voltmeter.getValue();
+    volt = volt * -1;
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
@@ -171,12 +173,13 @@ void loop()
     //sluchátka krabička 26%
     baterie = volt/120;
     current = Ammeter.getValue() ;
-    Serial.print(volt);
+    /*Serial.print(volt);
     Serial.print(" ");
     Serial.print(current);
     Serial.print(" ");
     Serial.print(baterie);
-    
+    */
+    task.Update();
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 40);
     M5.Lcd.printf("Proud:  %.2f mA", current);
