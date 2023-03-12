@@ -3,6 +3,7 @@
 #include "PinDefinitionsAndMore.h"
 #include <IRremote.hpp>
 #include <Wire.h>
+#include <AsyncTaskLib.h>
 #include "ThingSpeak.h"
 #include <WiFi.h>
 #define CHANNEL_ID 2046903
@@ -70,6 +71,7 @@ void odesilani(float volt,float current,float baterie)
             ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
         }
 }
+AsyncTask task(15000, true, []() { odesilani(volt, current,baterie); });
 
 void setup(void) {
     M5.begin();
@@ -85,7 +87,6 @@ void setup(void) {
 
     M5.Lcd.setCursor(52, 210);  // Set the cursor at (52,210).  将光标设置在(52, 210)
 
-    M5.begin();
     Serial.begin(115200);
     M5.Lcd.setTextFont(1);
     M5.Lcd.setTextSize(1);
@@ -114,13 +115,16 @@ void setup(void) {
     // delay(10);
 
     // Connect to Wi-Fi network
-    M5.begin();
-    Serial.begin(115200);
     connectToWiFi(); // this function comes from a previous video
+    
+    ThingSpeak.begin(client);
+    task.Start();
+
 }
 void loop()
 {
-    
+    M5.update(); 
+    task.Update();
     sAddress = 0x1;
     sCommand = 0xA;
     sRepeats = 0x1;
@@ -153,7 +157,7 @@ void loop()
         adc_raw = total / count;
     }
 
-    volt= voltmeter.getValue() ;
+    volt= voltmeter.getValue() * -1;
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
