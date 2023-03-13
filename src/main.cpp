@@ -16,12 +16,6 @@ float volt = 0;
 float current = 0;
 float baterie = 0;
 
-uint8_t sAddress = 0x8;
-uint8_t sCommand = 0x3D;
-uint8_t sRepeats = 1;
-
-//0x49 - zapnuto 0x3D vypnuto
-
 ADS1115 Ammeter(AMETER, AMETER_ADDR, AMETER_EEPROM_ADDR);
 ADS1115 voltmeter;
 
@@ -118,14 +112,6 @@ void loop()
     M5.update(); 
     task.Update();
 
-    sAddress = 0x1;
-    sCommand = 0xA;
-    sRepeats = 0x1;
-    
-    IrSender.sendNEC(sAddress, sCommand, sRepeats);
-    M5.Lcd.setCursor(10,180);
-    M5.Lcd.print(sCommand, HEX);
-    M5.Lcd.setCursor(10,190);
     //M5.Lcd.println("poslano");
     //Serial.print("poslano ");
     voltmeter.getValue();
