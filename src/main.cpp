@@ -73,11 +73,9 @@ void setup(void) {
     hope = page512_volt / voltmeter.resolution; // | PAG_2048 |        32            |
                                                 // | PAG_512  |        16            |
                                                 // | PAG_256  |        8             |
-    M5.Lcd.setTextFont(4);  // Set font to 4 point font.  设置字体为4号字体
-    M5.Lcd.setCursor(52, 210);  // Set the cursor at (52,210).  将光标设置在(52, 210)
     M5.begin();
     Serial.begin(115200);
-    M5.Lcd.setTextFont(1);
+    M5.Lcd.setTextFont(2);
     M5.Lcd.setTextSize(1);
     M5.Lcd.setTextColor(WHITE);
     Ammeter.setMode(SINGLESHOT);
@@ -90,8 +88,6 @@ void setup(void) {
     // | PAG_2048 |        32            |
     // | PAG_512  |        16            |
     // | PAG_256  |        8             |
-    M5.Lcd.fillScreen(BLACK);
-    M5.Lcd.setTextFont(1);
     M5.Lcd.setCursor(51, 225);
     //   M5.Lcd.setCursor(118, 90);
     //   M5.Lcd.printf("SAVE");
@@ -133,8 +129,8 @@ void loop()
     }
     volt= voltmeter.getValue() ;
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 20);
-    M5.Lcd.printf("Napeti: %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
+    M5.Lcd.setCursor(16, 20);
+    M5.Lcd.printf(" %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
     
     //M5.Lcd.setTextColor(WHITE, BLACK);
     //M5.Lcd.setCursor(10, 40);
@@ -143,7 +139,7 @@ void loop()
     //powerbanka max 11763V = 117,63
     //sluchátka krabička 26%
     baterie = volt/120;
-    current = Ammeter.getValue() ;
+    current = Ammeter.getValue() *-1;
     /*Serial.print(volt);
     Serial.print(" ");
     Serial.print(current);
@@ -151,8 +147,8 @@ void loop()
     Serial.print(baterie);
     */
     M5.Lcd.setTextColor(WHITE, BLACK);
-    M5.Lcd.setCursor(10, 40);
-    M5.Lcd.printf("Proud:  %.2f mA", current);
+    M5.Lcd.setCursor(15, 90);
+    M5.Lcd.printf("  %.2f mA", current);
     volt_raw_list[raw_now_ptr] = Ammeter.adc_raw;
     raw_now_ptr                = (raw_now_ptr == 9) ? 0 : (raw_now_ptr + 1);
     for (uint8_t i = 0; i < 10; i++) {
