@@ -14,7 +14,7 @@
 
 float volt = 0;
 float current = 0;
-float baterie = 0;
+float nabijeni = 0;
 
 ADS1115 Ammeter(AMETER, AMETER_ADDR, AMETER_EEPROM_ADDR);
 ADS1115 voltmeter;
@@ -51,18 +51,18 @@ void connectToWiFi(){
         Serial.println(WiFi.localIP());
     }
 }
-void odesilani(float volt,float current,float baterie)
+void odesilani(float volt,float current,float nabijeni)
 {
     Serial.print("posilam");
-    if (volt != 0 || current!= 0 || baterie!= 0){
+    if (volt != 0 || current!= 0 || nabijeni!= 0){
             ThingSpeak.setField(1, volt);
             ThingSpeak.setField(2, current);
-            ThingSpeak.setField(3, baterie);
+            ThingSpeak.setField(3, nabijeni);
             ThingSpeak.writeFields(CHANNEL_ID, CHANNEL_API_KEY);
         Serial.print("poslano");
         }
 }
-AsyncTask task(15000, true, []() { odesilani(volt, current,baterie); });
+AsyncTask task(15000, true, []() { odesilani(volt, current,nabijeni); });
 
 void setup(void) {
     M5.begin();
@@ -132,20 +132,9 @@ void loop()
     M5.Lcd.setCursor(16, 20);
     M5.Lcd.printf(" %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
     
-    //M5.Lcd.setTextColor(WHITE, BLACK);
-    //M5.Lcd.setCursor(10, 40);
-    //M5.Lcd.printf("Cal ADC: %.0f \r\n",adc_raw * voltmeter.calibration_factor);
-        
-    //powerbanka max 11763V = 117,63
-    //sluchátka krabička 26%
-    baterie = volt/120;
+    nabijeni = volt + current;
     current = Ammeter.getValue() *-1;
-    /*Serial.print(volt);
-    Serial.print(" ");
-    Serial.print(current);
-    Serial.print(" ");
-    Serial.print(baterie);
-    */
+
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(15, 90);
     M5.Lcd.printf("  %.2f mA", current);
@@ -163,8 +152,4 @@ void loop()
     } else {
         adc_raw = total / count;
     }
-    
-    //M5.Lcd.setTextColor(WHITE, BLACK);
-    //M5.Lcd.setCursor(10, 80);
-    //M5.Lcd.printf("Cal ADC: %.0f", adc_raw * Ammeter.calibration_factor);
 }
