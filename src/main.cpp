@@ -16,6 +16,8 @@ float volt = 0;
 float current = 0;
 float nabijeni = 0;
 
+
+
 ADS1115 Ammeter(AMETER, AMETER_ADDR, AMETER_EEPROM_ADDR);
 ADS1115 voltmeter;
 
@@ -110,7 +112,7 @@ void loop()
 
     //M5.Lcd.println("poslano");
     //Serial.print("poslano ");
-    voltmeter.getValue();
+    voltmeter.getValue()*-1;
     volt_raw_list[raw_now_ptr] = voltmeter.adc_raw;
     raw_now_ptr                = (raw_now_ptr == 9) ? 0 : (raw_now_ptr + 1);
     int count = 0;
@@ -127,13 +129,14 @@ void loop()
     } else {
         adc_raw = total / count;
     }
-    volt= voltmeter.getValue() ;
+    volt= voltmeter.getValue();
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(16, 20);
     M5.Lcd.printf(" %.2f mv \r\n",adc_raw * voltmeter.resolution * voltmeter.calibration_factor);
     
-    nabijeni = volt + current;
-    current = Ammeter.getValue() *-1;
+   
+    current = Ammeter.getValue();
+    nabijeni = volt* current;
 
     M5.Lcd.setTextColor(WHITE, BLACK);
     M5.Lcd.setCursor(15, 90);
